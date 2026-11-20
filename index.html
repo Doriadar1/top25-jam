@@ -152,6 +152,32 @@ button,a{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text
 .confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:30;pointer-events:none;border-radius:2px}
 .mute[hidden]{display:none}.mute{position:fixed;top:max(12px,env(safe-area-inset-top));left:12px;z-index:12;width:40px;height:40px;border-radius:12px;background:var(--card);font-size:18px}
 @media (min-width:900px){.hero{width:380px}}
+
+/* full-screen cover song page */
+#song.photo{padding-top:0;padding-bottom:0}
+#song.photo .wrap{flex:1;min-height:100%;padding:max(14px,env(safe-area-inset-top)) 0 max(18px,env(safe-area-inset-bottom));position:relative;z-index:2}
+#song .full{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;animation:kb 24s ease-in-out infinite alternate}
+#song .full.zoomIn{animation:zoomIn 1.3s cubic-bezier(.2,.8,.2,1) both,kb 24s 1.3s ease-in-out infinite alternate}
+@keyframes zoomIn{from{transform:scale(1.35);filter:blur(16px) brightness(1.8)}}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.08)}}
+#song .shadeTop{position:fixed;top:0;left:0;right:0;height:190px;z-index:1;pointer-events:none;background:linear-gradient(rgba(8,3,18,.82),rgba(8,3,18,.35) 60%,transparent)}
+#song .shadeBot{position:fixed;bottom:0;left:0;right:0;height:72%;z-index:1;pointer-events:none;
+  background:linear-gradient(transparent,rgba(8,3,18,.55) 28%,rgba(8,3,18,.88) 55%,rgba(8,3,18,.97) 100%)}
+#song.photo .rankTag{position:relative;top:auto;right:auto;align-self:flex-start;margin:6px 4px 0}
+#song.photo .tagIn{animation:tagIn .8s .35s cubic-bezier(.2,.9,.3,1.4) both}
+@keyframes tagIn{from{opacity:0;transform:scale(2.2) rotate(-30deg)}}
+#song.photo .spacer{flex:1;min-height:22vh}
+#song.photo .bar .ibtn{background:rgba(8,3,18,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+#song.photo .prog .t{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9)}
+#song.photo .prog .pb{background:rgba(255,255,255,.28)}
+#song.photo .songT{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.8);margin-top:0}
+#song.photo .songA{color:#f1e8ff;text-shadow:0 1px 10px rgba(0,0,0,.95)}
+#song.photo .chip{background:rgba(8,3,18,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);color:#fff}
+#song.photo .firsts{background:linear-gradient(90deg,rgba(60,30,0,.75),rgba(80,10,45,.75));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff}
+#song.photo .fav{background:rgba(8,3,18,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+#song.photo .fav.on{background:rgba(255,61,139,.45);box-shadow:inset 0 0 0 2px var(--pink)}
+#song.photo .nav .prev{background:rgba(8,3,18,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+#song.photo .wrap>*:not(.full):not(.shadeTop):not(.shadeBot){position:relative;z-index:2}
 </style>
 </head>
 <body>
@@ -294,14 +320,15 @@ function render(k, fresh){
         <button class="pk" data-pick="${s.id}">${st.pick === s.id ? '✓ נבחר!' : 'בוחרים בזה'}</button></div>`).join('')}</div>` + nav;
   } else {
     const s = p.songs[0];
-    body = bar + `<div class="hero ${fresh ? 'coverIn' : ''}"><div class="vinyl"></div><img class="cover" src="${BASE}${s.id}.jpg" alt=""><div class="rankTag ${tagCls(r)}">${r}</div></div>
+    body = `<img class="full ${fresh ? 'zoomIn' : ''}" src="${BASE}${s.id}.jpg" alt=""><div class="shadeTop"></div><div class="shadeBot"></div>`
+      + bar + `<div class="rankTag ${tagCls(r)} ${fresh ? 'tagIn' : ''}">${r}</div><div class="spacer"></div>
       <h2 class="songT in" dir="auto">${esc(s.title)}</h2><div class="songA in" dir="auto">${esc(s.artist)}</div>
       <div class="stats in2"><span class="chip"><b>${s.points}</b> נקודות</span><span class="chip"><b>${s.voters}</b> מתוך ${DATA.voters} בחרו בו</span></div>
       ${s.firsts.length ? `<div class="firsts in2">${firstsTxt(s)}</div>` : ''}
       <div class="acts in3"><a class="act play" href="${ytUrl(s)}" target="_blank" rel="noopener">▶ נגן את השיר</a>
         <a class="act ch" href="${s.chords}" target="_blank" rel="noopener">🎸 אקורדים</a>${favBtn(s, 'fav')}</div>` + nav;
   }
-  $('#songBody').innerHTML = body; show('song');
+  $('#songBody').innerHTML = body; $('#song').classList.toggle('photo', !p.tie); show('song');
   $('#toHome').onclick = homeScreen; $('#openList').onclick = openList;
   $('#prev') && ($('#prev').onclick = () => go(k - 1, false));
   $('#next').onclick = () => nextP ? go(k + 1, true) : finale();
